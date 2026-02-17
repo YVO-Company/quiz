@@ -4,6 +4,7 @@ import AdComponent from '../components/AdComponent';
 
 const ResultPage = () => {
     const location = useLocation();
+
     const { score, total, mode } = location.state || { score: 0, total: 0, mode: 'unknown' };
 
     const percentage = total > 0 ? (score / total) * 100 : 0;
@@ -11,7 +12,7 @@ const ResultPage = () => {
     let message = "Good Try!";
     let emoji = "🙂";
     let color = "text-yellow-500";
-    
+
     if (percentage === 100) {
         message = "Perfect Score!";
         emoji = "🏆";
@@ -66,7 +67,7 @@ const ResultPage = () => {
                             strokeWidth="15"
                             fill="transparent"
                             strokeLinecap="round"
-                            className={color.replace('text', 'text')} 
+                            className={color.replace('text', 'text')}
                         />
                     </svg>
                     <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
@@ -79,6 +80,14 @@ const ResultPage = () => {
                 </p>
 
                 <div className="space-y-4">
+                    <Link
+                        to="/quiz-summary"
+                        state={{ score, total, mode }}
+                        className="block w-full bg-yellow-400 text-yellow-900 py-4 rounded-xl font-bold text-xl hover:bg-yellow-500 transition mb-4 hover:shadow-md text-center"
+                    >
+                        📜 View Detailed Summary
+                    </Link>
+
                     <Link to="/select-mode" className="block w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-bold text-xl hover:shadow-lg transition transform hover:-translate-y-1">
                         🔄 Play Again
                     </Link>

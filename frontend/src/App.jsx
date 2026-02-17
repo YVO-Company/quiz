@@ -4,6 +4,7 @@ import QuizSelection from './pages/QuizSelection';
 import QuizPage from './pages/QuizPage';
 import QuizFeedback from './pages/QuizFeedback';
 import ResultPage from './pages/ResultPage';
+import QuizSummary from './pages/QuizSummary';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -23,6 +24,7 @@ function App() {
                         <Route path="/quiz/:mode/:questionId" element={<QuizPage />} />
                         <Route path="/quiz/:mode/:questionId/result" element={<QuizFeedback />} />
                         <Route path="/result" element={<ResultPage />} />
+                        <Route path="/quiz-summary" element={<QuizSummary />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>

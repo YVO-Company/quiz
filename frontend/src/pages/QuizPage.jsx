@@ -29,7 +29,7 @@ const QuizPage = () => {
             synth.speak(u);
         } else if (type === 'wrong') {
             const u = new SpeechSynthesisUtterance("Oh no, try again next time!");
-            u.rate = 1.2; 
+            u.rate = 1.2;
             synth.speak(u);
         } else if (type === 'tick') {
             // Tick sound is hard with synth, maybe skip or use Audio context if needed
@@ -52,7 +52,7 @@ const QuizPage = () => {
     // Update Timer & Reset State on Question Change
     useEffect(() => {
         if (!quizData) return;
-        
+
         // Validate index
         if (isNaN(currentQIndex) || currentQIndex < 0 || currentQIndex >= quizData.questions.length) {
             navigate('/select-mode'); // Invalid URL
@@ -63,6 +63,11 @@ const QuizPage = () => {
         setIsAnswered(false);
         setSelectedOption(null);
         setFeedback(null);
+
+        // Clear history strictly on start of new quiz (index 0)
+        if (currentQIndex === 0) {
+            sessionStorage.removeItem(`quiz_history_${mode}`);
+        }
 
     }, [currentQIndex, quizData, navigate]);
 
@@ -87,15 +92,27 @@ const QuizPage = () => {
         setIsAnswered(true);
         setFeedback('wrong');
         playSound('wrong');
-        
-        // Save state and navigate to feedback
+
+        // Save history for timeout
         const currentQ = quizData.questions[currentQIndex];
-        navigate(`/quiz/${mode}/${currentQIndex + 1}/result`, { 
-            state: { 
-                isCorrect: false, 
-                answer: currentQ.answer, 
-                feedback: 'wrong' 
-            } 
+        const historyItem = {
+            question: currentQ.question,
+            selectedOption: null,
+            correctOption: currentQ.answer,
+            isCorrect: false
+        };
+        const history = JSON.parse(sessionStorage.getItem(`quiz_history_${mode}`) || '[]');
+        history.push(historyItem);
+        sessionStorage.setItem(`quiz_history_${mode}`, JSON.stringify(history));
+
+        // Save state and navigate to feedback
+
+        navigate(`/quiz/${mode}/${currentQIndex + 1}/result`, {
+            state: {
+                isCorrect: false,
+                answer: currentQ.answer,
+                feedback: 'wrong'
+            }
         });
     };
 
@@ -119,14 +136,25 @@ const QuizPage = () => {
             playSound('wrong');
         }
 
+        // Save history
+        const historyItem = {
+            question: currentQ.question,
+            selectedOption: option,
+            correctOption: currentQ.answer,
+            isCorrect: isCorrect
+        };
+        const history = JSON.parse(sessionStorage.getItem(`quiz_history_${mode}`) || '[]');
+        history.push(historyItem);
+        sessionStorage.setItem(`quiz_history_${mode}`, JSON.stringify(history));
+
         // Navigate to Feedback set time out for user to see visual feedback on button
         setTimeout(() => {
-             navigate(`/quiz/${mode}/${currentQIndex + 1}/result`, { 
-                state: { 
-                    isCorrect: isCorrect, 
-                    answer: currentQ.answer, 
-                    feedback: isCorrect ? 'correct' : 'wrong' 
-                } 
+            navigate(`/quiz/${mode}/${currentQIndex + 1}/result`, {
+                state: {
+                    isCorrect: isCorrect,
+                    answer: currentQ.answer,
+                    feedback: isCorrect ? 'correct' : 'wrong'
+                }
             });
         }, 1000);
     };
@@ -151,7 +179,7 @@ const QuizPage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-blue-50 py-4 px-4 font-sans select-none overflow-x-hidden">
             <div className="max-w-2xl mx-auto flex flex-col h-full">
-                
+
                 {/* Header Controls */}
                 <div className="flex justify-between items-center mb-6">
                     <button onClick={handleQuit} className="px-4 py-2 bg-white rounded-2xl shadow-md border-b-4 border-gray-200 text-gray-600 font-black hover:bg-gray-50 active:translate-y-1 active:border-b-0 transition-all flex items-center gap-2">
@@ -169,7 +197,7 @@ const QuizPage = () => {
                         <span>{quizData.questions.length} Total</span>
                     </div>
                     <div className="w-full bg-blue-50 rounded-full h-8 overflow-hidden border border-blue-100 relative">
-                        <motion.div 
+                        <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 0.8, type: "spring" }}
@@ -197,13 +225,13 @@ const QuizPage = () => {
 
                             {/* Timer Bar */}
                             <div className="absolute top-0 left-0 w-full h-3 bg-gray-100">
-                                <motion.div 
-                                    className={`h-full ${timeLeft < 5 ? 'bg-red-500' : 'bg-green-400'}`} 
+                                <motion.div
+                                    className={`h-full ${timeLeft < 5 ? 'bg-red-500' : 'bg-green-400'}`}
                                     animate={{ width: `${(timeLeft / quizData.time_limit) * 100}%` }}
                                     transition={{ ease: "linear", duration: 1 }}
                                 />
                             </div>
-                            
+
                             <div className="p-6 md:p-10 text-center relative z-10">
                                 <h2 className="text-6xl md:text-8xl font-black text-gray-800 mb-10 mt-4 drop-shadow-sm font-comic">
                                     {currentQuestion.question}
@@ -212,7 +240,7 @@ const QuizPage = () => {
                                 <div className="grid grid-cols-2 gap-4 md:gap-6">
                                     {currentQuestion.options.map((option, idx) => {
                                         let btnClass = "bg-white border-b-8 border-gray-200 text-gray-700 hover:bg-gray-50";
-                                        
+
                                         if (isAnswered) {
                                             if (option == currentQuestion.answer) {
                                                 btnClass = "bg-green-100 border-green-500 text-green-700 scale-105 border-b-8 ring-4 ring-green-200";
@@ -238,7 +266,7 @@ const QuizPage = () => {
                                     })}
                                 </div>
                             </div>
-                            
+
                             {/* Feedback removed here as we navigate away */}
                         </motion.div>
                     </AnimatePresence>
@@ -246,7 +274,7 @@ const QuizPage = () => {
 
                 {/* Bottom Ad */}
                 <div className="mt-auto">
-                     <AdComponent className="w-full h-16 bg-white/50 rounded-xl" />
+                    <AdComponent className="w-full h-16 bg-white/50 rounded-xl" />
                 </div>
             </div>
         </div>

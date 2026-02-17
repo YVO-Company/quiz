@@ -53,7 +53,7 @@ const Home = () => {
             <motion.div animate={{ x: [0, -30, 0] }} transition={{ repeat: Infinity, duration: 7 }} className="fixed bottom-10 left-20 text-8xl opacity-20 select-none">🎨</motion.div>
             
             {/* Floor Decoration */}
-            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-green-200 to-transparent -z-0"></div>
+
         </div>
     );
 };
